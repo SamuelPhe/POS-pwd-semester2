@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+*.log
+/vendor/
+/node_modules/
+/.cache/
+/tmp/
+/temp/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.ibd
+*.frm
+*.opt
