@@ -58,7 +58,11 @@ flowchart TD
 
 ## 5. Demo and local setup
 
-There is **no publicly hosted demo**. The application can be run locally with PHP and MySQL or MariaDB.
+The repository now includes a **static browser demo** in [`demo/index.html`](demo/index.html). It simulates administrator and cashier workflows, product catalog, inventory, checkout, payment calculation, and transaction history with fictional data. It does not connect to the original PHP/MySQL application.
+
+To publish the demo, enable GitHub Pages at **Settings → Pages → Build and deployment → Source: GitHub Actions**, then run **Deploy browser demo** from the Actions tab. After deployment, the public URL will be: https://samuelphe.github.io/POS-pwd-semester2/.
+
+The original PHP application can be run locally with PHP and MySQL or MariaDB.
 
 1. Install PHP 8.x, MySQL or MariaDB, and a local web-server environment such as XAMPP.
 2. Create/import the database using [database/schema.sql](database/schema.sql).
