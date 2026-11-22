@@ -9,52 +9,61 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect POS archive and SQL structure without exposing row values
+      - name: Summarize database dump without outputting credentials or row values
         shell: bash
         run: |
           python - <<'PY'
-          import io, zipfile, pathlib
-          quote_chars = chr(96) + '"'
+          import io, zipfile, pathlib, re
+          def count_rows(values):
+              depth, quote, escaped, count = 0, None, False, 0
+              for ch in values:
+                  if quote:
+                      if escaped: escaped = False
+                      elif ch == "\\\\": escaped = True
+                      elif ch == quote: quote = None
+                      continue
+                  if ch in ("'", '"', chr(96)):
+                      quote = ch
+                  elif ch == "(":
+                      depth += 1
+                      if depth == 1: count += 1
+                  elif ch == ")":
+                      depth = max(0, depth - 1)
+              return count
           def summarize_sql(text, label):
-              tables, inserts = set(), set()
-              count = 0
-              for line in text.splitlines():
+              print("SQL_FILE", label)
+              lines = text.splitlines()
+              current = None
+              cols = {}
+              for line in lines:
                   clean = line.strip()
                   upper = clean.upper()
                   if upper.startswith("CREATE TABLE"):
                       parts = clean.replace("(", " ").split()
-                      idx = 5 if len(parts) > 5 and parts[1:5] == ["TABLE", "IF", "NOT", "EXISTS"] else 2
-                      if len(parts) > idx:
-                          tables.add(parts[idx].strip(quote_chars))
-                  if upper.startswith("INSERT INTO"):
-                      parts = clean.split()
-                      if len(parts) > 2:
-                          inserts.add(parts[2].strip(quote_chars))
-                          count += 1
-              print("SQL_SUMMARY", label, "TABLES", sorted(tables), "INSERT_TABLES", sorted(inserts), "INSERT_STATEMENTS", count)
-          def inspect_zip(data, label, depth=0):
-              if depth > 3:
-                  print("MAX_NESTED_DEPTH", label); return
-              try:
-                  z = zipfile.ZipFile(io.BytesIO(data))
-              except Exception as exc:
-                  print("NOT_A_ZIP", label, type(exc).__name__); return
-              print("ARCHIVE", label)
+                      current = parts[2].strip(chr(96) + '"') if len(parts) > 2 else None
+                      if current: cols[current] = []
+                  elif current and clean.startswith(")") :
+                      current = None
+                  elif current and clean.startswith(chr(96)):
+                      name = clean.split(chr(96))[1]
+                      cols[current].append(name)
+              for match in re.finditer(r"INSERT\\s+INTO\\s+([^\\s(]+)[\\s\\S]*?VALUES\\s*", text, re.I):
+                  table = match.group(1).strip(chr(96) + '"')
+                  start = match.end()
+                  end = text.find(";", start)
+                  values = text[start:end if end >= 0 else len(text)]
+                  print("TABLE_DATA", table, "ROW_TUPLES", count_rows(values), "COLUMNS", cols.get(table, []))
+          def walk(data, label, depth=0):
+              if depth > 3: return
+              z = zipfile.ZipFile(io.BytesIO(data))
               for info in z.infolist():
-                  name = info.filename
                   if info.is_dir(): continue
-                  print("ENTRY", name, "BYTES", info.file_size)
-                  low = name.lower()
-                  if low.endswith(".sql"):
-                      summarize_sql(z.read(name).decode("utf-8","replace"), name)
-                  elif low.endswith(".zip"):
-                      inspect_zip(z.read(name), label + "!" + name, depth+1)
-          schema = pathlib.Path("database/schema.sql")
-          if schema.exists():
-              summarize_sql(schema.read_text(errors="replace"), str(schema))
+                  name = info.filename
+                  if name.lower().endswith(".sql"):
+                      summarize_sql(z.read(name).decode("utf-8","replace"), label + "!" + name)
+                  elif name.lower().endswith(".zip"):
+                      walk(z.read(name), label + "!" + name, depth+1)
           archive = pathlib.Path("UAS PEMWEB.zip")
-          if archive.exists():
-              inspect_zip(archive.read_bytes(), str(archive))
-          else:
-              print("ARCHIVE_MISSING", str(archive))
+          if archive.exists(): walk(archive.read_bytes(), str(archive))
+          else: print("ARCHIVE_MISSING")
           PY
