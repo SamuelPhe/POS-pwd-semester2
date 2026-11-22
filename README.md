@@ -4,7 +4,6 @@ This Point of Sale application was developed as a **Semester 2 web-development**
 
 > **Project type:** Web application  
 > **Project context:** Academic project — Semester 2  
-> **Public showcase:** [POS-PWD-Showcase](https://github.com/SamuelPhe/POS-PWD-Showcase)
 
 ## 1. Application preview
 
