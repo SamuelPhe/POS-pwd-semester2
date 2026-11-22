@@ -1,0 +1,60 @@
+name: Temporary POS archive database audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/tmp-archive-audit.yml"
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect POS archive and SQL structure without exposing row values
+        shell: bash
+        run: |
+          python - <<'PY'
+          import io, zipfile, pathlib
+          quote_chars = chr(96) + '"'
+          def summarize_sql(text, label):
+              tables, inserts = set(), set()
+              count = 0
+              for line in text.splitlines():
+                  clean = line.strip()
+                  upper = clean.upper()
+                  if upper.startswith("CREATE TABLE"):
+                      parts = clean.replace("(", " ").split()
+                      idx = 5 if len(parts) > 5 and parts[1:5] == ["TABLE", "IF", "NOT", "EXISTS"] else 2
+                      if len(parts) > idx:
+                          tables.add(parts[idx].strip(quote_chars))
+                  if upper.startswith("INSERT INTO"):
+                      parts = clean.split()
+                      if len(parts) > 2:
+                          inserts.add(parts[2].strip(quote_chars))
+                          count += 1
+              print("SQL_SUMMARY", label, "TABLES", sorted(tables), "INSERT_TABLES", sorted(inserts), "INSERT_STATEMENTS", count)
+          def inspect_zip(data, label, depth=0):
+              if depth > 3:
+                  print("MAX_NESTED_DEPTH", label); return
+              try:
+                  z = zipfile.ZipFile(io.BytesIO(data))
+              except Exception as exc:
+                  print("NOT_A_ZIP", label, type(exc).__name__); return
+              print("ARCHIVE", label)
+              for info in z.infolist():
+                  name = info.filename
+                  if info.is_dir(): continue
+                  print("ENTRY", name, "BYTES", info.file_size)
+                  low = name.lower()
+                  if low.endswith(".sql"):
+                      summarize_sql(z.read(name).decode("utf-8","replace"), name)
+                  elif low.endswith(".zip"):
+                      inspect_zip(z.read(name), label + "!" + name, depth+1)
+          schema = pathlib.Path("database/schema.sql")
+          if schema.exists():
+              summarize_sql(schema.read_text(errors="replace"), str(schema))
+          archive = pathlib.Path("UAS PEMWEB.zip")
+          if archive.exists():
+              inspect_zip(archive.read_bytes(), str(archive))
+          else:
+              print("ARCHIVE_MISSING", str(archive))
+          PY
