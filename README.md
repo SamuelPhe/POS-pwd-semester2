@@ -61,6 +61,19 @@ The repository now includes a **static browser demo** in [`demo/index.html`](dem
 
 To publish the demo, enable GitHub Pages at **Settings → Pages → Build and deployment → Source: GitHub Actions**, then run **Deploy browser demo** from the Actions tab. After deployment, the public URL will be: https://samuelphe.github.io/POS-pwd-semester2/.
 
+### Open the original PHP application in GitHub Codespaces
+
+The PHP/MySQL application can be opened in a private Codespace. This is different from the static GitHub Pages preview above.
+
+1. Open this repository on GitHub.
+2. Select **Code → Codespaces → Create codespace on main** (or resume the existing POS Codespace).
+3. Wait for the PHP/Apache and MariaDB services to start.
+4. Open the **Ports** tab in the Codespaces editor.
+5. Find **POS web (private)** on port `8080`, then choose **Open in Browser`.
+6. The original PHP login page is served at `/login.php`.
+
+The Codespace imports `database/schema.sql` into an isolated local MariaDB database. The schema contains table definitions but no user rows, so there is **no default login account**. The login page can be viewed immediately, but authentication requires an administrator or cashier account to be created in the local Codespaces database. Keep port `8080` **Private** and do not use this environment for real customer, payment, or inventory records.
+
 The original PHP application can be run locally with PHP and MySQL or MariaDB.
 
 1. Install PHP 8.x, MySQL or MariaDB, and a local web-server environment such as XAMPP.

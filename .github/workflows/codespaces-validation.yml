@@ -1,0 +1,56 @@
+name: Validate POS Codespaces web setup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".devcontainer/**"
+      - ".github/workflows/codespaces-validation.yml"
+      - "database/schema.sql"
+      - "*.php"
+      - "includes/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".devcontainer/**"
+      - ".github/workflows/codespaces-validation.yml"
+      - "database/schema.sql"
+      - "*.php"
+      - "includes/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Codespaces configuration
+        run: |
+          python3 -c 'import json; json.load(open(".devcontainer/devcontainer.json"))'
+          localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml config -q
+          test -f .devcontainer/php/Dockerfile
+
+      - name: Start web and database services
+        run: |
+          if ! localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml up -d --build --wait --wait-timeout 240; then
+            localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml logs
+            exit 1
+          fi
+
+      - name: Validate PHP pages and database connection
+        run: |
+          localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -l /var/www/html/login.php
+          localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -l /var/www/html/auth.php
+          page=$(curl --fail --silent --show-error http://127.0.0.1:8080/login.php)
+          printf '%s' "$page" | grep -q 'LOGIN POS'
+          users=$(localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -r '$db = new mysqli(getenv("DB_HOST"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), getenv("DB_DATABASE")); echo $db->query("SELECT COUNT(*) FROM users")->fetch_row()[0];')
+          test "$users" -ge 0
+
+      - name: Stop local services
+        if: always()
+        run: |
+          localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml down -v

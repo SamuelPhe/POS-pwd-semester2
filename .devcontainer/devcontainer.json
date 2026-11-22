@@ -1,0 +1,14 @@
+{
+  "name": "POS Web — Codespaces",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "POS web (private)",
+      "onAutoForward": "openBrowser",
+      "protocol": "http"
+    }
+  }
+}
