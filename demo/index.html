@@ -7,6 +7,38 @@
 @media(max-width:1000px){.layout{grid-template-columns:1fr}.side{padding:13px;gap:12px}.nav{grid-template-columns:repeat(5,1fr)}.navhead,.side-note{display:none}.nav button{justify-content:center;padding:9px 4px;font-size:11px}.nav .sym{display:none}.content{padding:21px 16px}.top{padding:0 16px}.cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.pos-grid{grid-template-columns:1fr}.product-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.top{height:auto;padding:12px;flex-wrap:wrap;gap:10px}.right{width:100%;justify-content:space-between}.content{padding:17px 12px}.head{display:block}.head .btn{margin-top:13px}.panel{padding:13px}.form{grid-template-columns:1fr}.f.full{grid-column:auto}.cards{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}.nav{grid-template-columns:repeat(3,1fr)}.product-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style>
+
+/* Visual alignment with the original PHP/Tailwind POS screens */
+body{background:#f3f4f6;color:#1f2937;font-family:Arial,"Segoe UI",sans-serif}
+.layout{grid-template-columns:256px minmax(0,1fr);background:#f3f4f6}
+.side{background:#fff;color:#374151;border-right:1px solid #e5e7eb;padding:0 0 18px;gap:0}
+.brand{padding:18px 16px;border-bottom:1px solid #e5e7eb}
+.mark{background:#2563eb;color:#fff;border-radius:8px}
+.brand strong{color:#111827}
+.brand small{color:#6b7280;letter-spacing:.7px}
+.navhead{color:#6b7280;margin:18px 16px 8px}
+.nav{padding:0 10px;gap:3px}
+.nav button{color:#374151;border-radius:7px;padding:11px 12px}
+.nav button:hover,.nav button.active{background:#eff6ff;color:#2563eb}
+.nav button[data-page="checkout"]{display:none}
+.side-note{margin:20px 12px 0;background:#f9fafb;border-color:#e5e7eb;color:#6b7280;border-radius:8px}
+.side-note b{color:#374151}
+.top{height:64px;background:#fff;border-bottom:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,.04);padding:0 28px}
+.crumb,.crumb b{color:#6b7280}
+.crumb b{color:#1f2937}
+.demo{background:#eff6ff;border-color:#dbeafe;color:#1d4ed8}
+.role{border-radius:6px;border-color:#d1d5db;color:#374151}
+.avatar{border-radius:8px;background:#dbeafe;color:#1d4ed8}
+.content{max-width:none;padding:24px 28px 44px}
+.panel,.stat{border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.btn.primary{background:#2563eb;border-radius:6px}
+.btn.soft{border-radius:6px}
+table{border-collapse:collapse}
+thead{background:#f9fafb}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.side{border-right:0}.content{padding:18px}}
+
 </style></head><body>
 <div class="layout">
 <aside class="side"><div class="brand"><div class="mark">P</div><div><strong>Point of Sale</strong><small>Retail operations</small></div></div><div><div class="navhead">Main menu</div><nav class="nav">
