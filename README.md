@@ -1,28 +1,91 @@
-# Point of Sale (POS) — Semester 2
+# Point of Sale (POS) — Web-based Cashier Application
 
-Aplikasi kasir berbasis web untuk proyek perkuliahan pengembangan web.
+This Point of Sale application was developed as a **Semester 2 web-development** course project. It models a small retail cashier workflow with separate administrator and cashier areas, product and stock management, and sales transaction records.
 
-## Fitur
-- Login Admin dan Kasir.
-- Dashboard berdasarkan peran pengguna.
-- Pengelolaan produk dan kategori.
-- Pemantauan serta penyesuaian stok inventaris.
-- Pencatatan transaksi penjualan, pembayaran, dan kembalian.
-- Riwayat dan detail transaksi.
+> **Project type:** Web application  
+> **Project context:** Academic project — Semester 2  
+> **Public showcase:** [POS-PWD-Showcase](https://github.com/SamuelPhe/POS-PWD-Showcase)
 
-## Teknologi
-PHP, MySQL/MariaDB, MySQLi, HTML, CSS, dan JavaScript.
+## 1. Application preview
 
-## Menjalankan secara lokal
-1. Siapkan PHP 8.x, MySQL/MariaDB, dan web server lokal seperti XAMPP.
-2. Import `database/schema.sql` ke MySQL/MariaDB.
-3. Atur environment variable pada environment PHP/Apache: `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, dan `DB_DATABASE` (default `pos`).
-4. Letakkan folder proyek di document root web server, lalu buka `login.php`.
-5. Buat akun Admin sendiri. Hasilkan hash password dengan:
-   ```bash
-   php -r "echo password_hash('GANTI_DENGAN_PASSWORD_UNIK', PASSWORD_DEFAULT), PHP_EOL;"
-   ```
-   Masukkan hash hasilnya ke kolom `users.password` bersama username dan role `admin`.
+The repository does not currently contain application screenshots. UI preview images can be added after capturing the application with fictional products, test accounts, and synthetic transactions.
 
-## Catatan
-Ini proyek akademik, bukan aplikasi siap produksi. Kode autentikasi dan beberapa endpoint telah dirapikan, tetapi perlindungan CSRF, validasi menyeluruh, konfigurasi session/cookie, serta pengujian transaksi masih perlu ditingkatkan. Tidak ada kredensial atau akun demo yang disertakan.
+Suggested screenshots:
+- Login page
+- Administrator dashboard
+- Product and stock management
+- Cashier checkout
+- Transaction detail and payment summary
+
+Do not publish real customer, cashier, or payment information.
+
+## 2. Main features
+
+- Login for **administrator** and **cashier** roles
+- Role-specific dashboards
+- Product and category management
+- Inventory monitoring and stock adjustments
+- Sales transaction processing
+- Payment, paid amount, and change calculation
+- Transaction history and detail views
+- Separate transaction and stock actions for administrator and cashier workflows
+
+## 3. Technology stack
+
+- PHP
+- MySQL / MariaDB
+- MySQLi
+- HTML and CSS
+- JavaScript
+
+## 4. Architecture overview
+
+The application uses a page-oriented PHP structure. Login and authentication logic establish the user role, then the administrator and cashier pages expose their respective workflows. PHP action scripts process product, stock, and transaction changes through a shared MySQLi database connection.
+
+```mermaid
+flowchart TD
+    U[Administrator or Cashier] --> WEB[Browser]
+    WEB --> LOGIN[login.php and auth.php]
+    LOGIN --> ROLE[Role-specific Dashboard]
+    ROLE --> ADMIN[Administrator Pages]
+    ROLE --> CASHIER[Cashier Pages]
+    ADMIN --> ACTION[Product, Stock, and Transaction Handlers]
+    CASHIER --> ACTION
+    ACTION --> DBL[database.php / MySQLi]
+    DBL --> DB[(MySQL / MariaDB)]
+    DB --> DATA[Products, Inventory, Users, Transactions, Transaction Items]
+```
+
+## 5. Demo and local setup
+
+There is **no publicly hosted demo**. The application can be run locally with PHP and MySQL or MariaDB.
+
+1. Install PHP 8.x, MySQL or MariaDB, and a local web-server environment such as XAMPP.
+2. Create/import the database using [database/schema.sql](database/schema.sql).
+3. Configure these environment variables for PHP/Apache:
+   - `DB_HOST` (default: `127.0.0.1`)
+   - `DB_USERNAME`
+   - `DB_PASSWORD`
+   - `DB_DATABASE` (default: `pos`)
+4. Place the project in the web server document root.
+5. Open `login.php` through the local web server.
+6. Create a local administrator account using a password hash. No demo credentials are published.
+
+## 6. Database overview
+
+The schema defines the core POS data:
+- `users` — login identity and role
+- `products` — product and category information
+- `inventory` — stock quantities and locations
+- `transactions` — transaction totals, payment, and change
+- `transaction_items` — products and quantities recorded per transaction
+
+## 7. Copyright and license
+
+Copyright (c) 2026 Samuel Phe. All rights reserved.
+
+Original project code, documentation, and assets authored for this POS application are proprietary. No permission is granted to copy, modify, redistribute, sublicense, or reuse these materials without prior written permission. Third-party components and assets, if present, remain subject to their own licenses and notices. See the [LICENSE](LICENSE) file.
+
+---
+
+This is an academic portfolio project, not a production-ready payment or retail system. Further work is required for comprehensive CSRF protection, input validation, secure session/cookie configuration, and thorough transaction testing before real-world use.
