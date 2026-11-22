@@ -82,10 +82,16 @@ The schema defines the core POS data:
 
 ## 7. Copyright and license
 
-Copyright (c) 2026 Samuel Phe. All rights reserved.
+This is a collaborative academic project developed by the following team members:
 
-Original project code, documentation, and assets authored for this POS application are proprietary. No permission is granted to copy, modify, redistribute, sublicense, or reuse these materials without prior written permission. Third-party components and assets, if present, remain subject to their own licenses and notices. See the [LICENSE](LICENSE) file.
+- Chang Shau Liong
+- Nathaniel Farrel
+- Nicohlas
+- Samuel
 
+This attribution recognizes the project team and does not claim that the entire project or every contribution is solely owned by Samuel Phe. Ownership and rights in jointly created materials and individual contributions remain with the respective authors or rightsholders, subject to any applicable team, course, institutional, or other agreements.
+
+No open-source license is granted by this repository for project materials created by the team. Permission to copy, modify, redistribute, sublicense, or reuse team-created materials should be obtained from the relevant rightsholders. Any third-party components and assets remain subject to their own licenses and notices. See the [LICENSE](LICENSE) file.
 ---
 
 This is an academic portfolio project, not a production-ready payment or retail system. Further work is required for comprehensive CSRF protection, input validation, secure session/cookie configuration, and thorough transaction testing before real-world use.
