@@ -72,7 +72,20 @@ The PHP/MySQL application can be opened in a private Codespace. This is differen
 5. Find **POS web (private)** on port `8080`, then choose **Open in Browser`.
 6. The original PHP login page is served at `/login.php`.
 
-The Codespace imports `database/schema.sql` into an isolated local MariaDB database. The schema contains table definitions but no user rows, so there is **no default login account**. The login page can be viewed immediately, but authentication requires an administrator or cashier account to be created in the local Codespaces database. Keep port `8080` **Private** and do not use this environment for real customer, payment, or inventory records.
+The Codespace imports `database/schema.sql` into an isolated local MariaDB database. The schema contains table definitions only. To create fictional demo accounts and sample products, run this once from the Codespaces workspace terminal:
+
+```bash
+curl -X POST http://web/seed_codespace_demo.php
+```
+
+Demo login credentials (Codespaces only):
+
+| Role | Username | Password |
+|---|---|---|
+| Administrator | `admin` | `123456` |
+| Cashier | `kasir` | `123456` |
+
+The seeder is restricted to the Codespaces MariaDB service and adds demo products and inventory without deleting existing records or resetting existing stock. Keep port `8080` **Private** and do not use these credentials or this environment for real customer, payment, or inventory records.
 
 The original PHP application can be run locally with PHP and MySQL or MariaDB.
 
