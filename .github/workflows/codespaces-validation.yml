@@ -41,14 +41,37 @@ jobs:
             exit 1
           fi
 
-      - name: Validate PHP pages and database connection
+      - name: Validate PHP pages and seed isolated demo data
         run: |
           localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -l /var/www/html/login.php
           localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -l /var/www/html/auth.php
+          localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -l /var/www/html/process_transaction.php
+          localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -l /var/www/html/seed_codespace_demo.php
+
           page=$(curl --fail --silent --show-error http://127.0.0.1:8080/login.php)
           printf '%s' "$page" | grep -q 'LOGIN POS'
-          users=$(localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -r '$db = new mysqli(getenv("DB_HOST"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), getenv("DB_DATABASE")); echo $db->query("SELECT COUNT(*) FROM users")->fetch_row()[0];')
-          test "$users" -ge 0
+
+          seed=$(curl --fail --silent --show-error -X POST -H 'Host: web' http://127.0.0.1:8080/seed_codespace_demo.php)
+          printf '%s' "$seed" | grep -q '"success":true'
+
+          counts=$(localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -r '$db = new mysqli(getenv("DB_HOST"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), getenv("DB_DATABASE")); $users = $db->query("SELECT COUNT(*) FROM users WHERE username IN (\"admin\", \"kasir\")")->fetch_row()[0]; $products = $db->query("SELECT COUNT(*) FROM products")->fetch_row()[0]; echo $users . " " . $products;')
+          set -- $counts
+          test "$1" -eq 2
+          test "$2" -ge 8
+
+      - name: Smoke-test authenticated checkout and stock deduction
+        run: |
+          curl --silent --show-error --output /tmp/pos-login-response.html --cookie-jar /tmp/pos-cookie.jar --data 'username=admin&password=123456' http://127.0.0.1:8080/auth.php
+
+          product_id=$(localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -r '$db = new mysqli(getenv("DB_HOST"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), getenv("DB_DATABASE")); $row = $db->query("SELECT product_id FROM products ORDER BY product_id ASC LIMIT 1")->fetch_assoc(); echo (int) $row["product_id"];')
+          test -n "$product_id"
+
+          payload=$(printf '{"customer_type":"walkin","discount":0,"total_amount":0,"paid_amount":999999,"items":[{"productId":%s,"quantity":1,"price":0}]}' "$product_id")
+          result=$(curl --fail --silent --show-error --cookie /tmp/pos-cookie.jar -H 'Content-Type: application/json' --data "$payload" http://127.0.0.1:8080/process_transaction.php)
+          printf '%s' "$result" | grep -q '"success":true'
+
+          item_check=$(localWorkspaceFolderBasename=pos docker compose -f .devcontainer/docker-compose.yml exec -T web php -r '$db = new mysqli(getenv("DB_HOST"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"), getenv("DB_DATABASE")); $row = $db->query("SELECT ti.price, ti.price_per_item FROM transaction_items ti ORDER BY ti.item_id DESC LIMIT 1")->fetch_assoc(); if (!$row || (float) $row["price"] <= 0 || (float) $row["price_per_item"] <= 0) { exit(1); } echo "ok";')
+          test "$item_check" = "ok"
 
       - name: Stop local services
         if: always()
