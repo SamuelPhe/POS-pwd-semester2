@@ -19,6 +19,8 @@ The SQL schema has no seeded users, so no demo username or password is supplied.
 
 Keep port `8080` **Private**. This database is an isolated coursework copy, not a production POS system.
 
+If this Codespace was created before the web service/port was added or updated, open the Command Palette and run **Codespaces: Rebuild Container**. This applies the current Compose configuration; it does not require deleting the Codespace or its named database volume.
+
 ## Stop and resume
 
 Stop the Codespace when finished. When it resumes, the web and database services start again. The MariaDB named volume remains while the Codespace and volume are retained.
