@@ -67,7 +67,7 @@ $today_revenue = $conn->query("SELECT SUM(total_amount) as total FROM transactio
         <!-- Sidebar -->
         <div class="bg-white w-64 min-h-screen shadow-lg">
             <div class="p-4 flex items-center justify-center border-b">
-                <img src="logo.png" alt="Company Logo" class="h-10">
+                <img src="logo.svg" alt="POS — Point of Sale" class="h-10 w-auto object-contain">
             </div>
             <div class="p-4">
                 <div class="flex items-center space-x-3 mb-6">
